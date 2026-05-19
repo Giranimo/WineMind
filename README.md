@@ -2,7 +2,9 @@
 
 A native iOS app for wine lovers — photograph any wine label, get a verdict on whether you'll love it, and discover similar wines from a private community of ratings.
 
-![Mockup preview](mockup.html)
+### 🍷 [**View the live mockup →**](https://giranimo.github.io/WineMind/)
+
+The mockup shows all 11 screens (Sign In, Quiz, Cellar, Capture, Prediction, Detail, Discover, Profile, etc.) in interactive iPhone frames.
 
 ## Features
 

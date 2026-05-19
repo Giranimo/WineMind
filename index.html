@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WineMind — Your personal sommelier</title>
+<meta name="description" content="A native iOS wine app — photograph any wine label, get a verdict on whether you'll love it, and discover similar wines.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120D10;
+    --surface: #1C141A;
+    --surface-elev: #261B21;
+    --burgundy: #732033;
+    --burgundy-light: #9E2E48;
+    --bordeaux: #8C1F33;
+    --gold: #D4B16B;
+    --champagne: #F2DEB5;
+    --cream: #F5EEE0;
+    --muted: #AE9E94;
+    --dim: #7A716B;
+    --divider: #382E33;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: linear-gradient(180deg, #0A0608 0%, #1A0E12 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--cream);
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 20px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '🍷';
+    position: absolute;
+    font-size: 400px;
+    color: var(--burgundy);
+    opacity: 0.05;
+    transform: rotate(-15deg);
+    pointer-events: none;
+  }
+  .logo-circle {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(180deg, var(--bordeaux), var(--burgundy));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    box-shadow: 0 0 60px rgba(115, 32, 51, 0.6);
+    margin-bottom: 24px;
+    z-index: 1;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 700;
+    color: var(--cream);
+    letter-spacing: -2px;
+    z-index: 1;
+  }
+  .gold-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 24px 0;
+    width: 200px;
+    z-index: 1;
+  }
+  .gold-divider::before,
+  .gold-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(212, 177, 107, 0.4);
+  }
+  .gold-divider span {
+    color: var(--gold);
+    font-size: 10px;
+  }
+  .tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(18px, 3vw, 24px);
+    color: var(--gold);
+    margin-bottom: 14px;
+    z-index: 1;
+  }
+  .subline {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 540px;
+    line-height: 1.6;
+    z-index: 1;
+    margin-bottom: 40px;
+  }
+  .cta-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    z-index: 1;
+  }
+  .btn {
+    padding: 16px 32px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(180deg, var(--bordeaux), var(--burgundy));
+    color: var(--cream);
+    box-shadow: 0 8px 24px rgba(115, 32, 51, 0.4);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(115, 32, 51, 0.6);
+  }
+  .btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid rgba(212, 177, 107, 0.6);
+  }
+  .btn-outline:hover {
+    background: rgba(212, 177, 107, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Sections */
+  section {
+    padding: 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .section-header .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 5vw, 48px);
+    color: var(--cream);
+    font-weight: 700;
+  }
+
+  /* Features grid */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+  .feature-card {
+    background: linear-gradient(135deg, var(--surface-elev), var(--surface));
+    border-radius: 16px;
+    padding: 28px;
+    border: 0.5px solid var(--divider);
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(212, 177, 107, 0.4);
+  }
+  .feature-card .icon {
+    font-size: 32px;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+  .feature-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    color: var(--cream);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .feature-card p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* Mockup preview embed */
+  .mockup-preview {
+    background: var(--surface);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--divider);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    margin: 40px auto 0;
+    max-width: 1100px;
+    height: 700px;
+    position: relative;
+  }
+  .mockup-preview iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: var(--bg);
+  }
+  .mockup-actions {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  /* How it works */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    counter-reset: step;
+  }
+  .step {
+    background: linear-gradient(135deg, var(--surface-elev), var(--surface));
+    border-radius: 14px;
+    padding: 24px;
+    border: 0.5px solid var(--divider);
+    position: relative;
+    counter-increment: step;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute;
+    top: -16px;
+    left: 24px;
+    width: 32px;
+    height: 32px;
+    background: var(--gold);
+    color: var(--bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .step h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--cream);
+    margin: 8px 0 6px;
+  }
+  .step p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* Tech */
+  .tech-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 24px;
+  }
+  .pill {
+    padding: 10px 18px;
+    background: var(--surface);
+    border: 0.5px solid rgba(212, 177, 107, 0.3);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--cream);
+    font-weight: 500;
+  }
+  .pill .gold { color: var(--gold); font-weight: 600; }
+
+  /* Footer */
+  footer {
+    padding: 60px 20px 40px;
+    text-align: center;
+    border-top: 0.5px solid var(--divider);
+    margin-top: 60px;
+    color: var(--dim);
+    font-size: 13px;
+  }
+  footer a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 640px) {
+    .mockup-preview { height: 600px; }
+    section { padding: 60px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="logo-circle">🍷</div>
+  <h1>WineMind</h1>
+  <div class="gold-divider"><span>◆</span></div>
+  <div class="tagline">Your personal sommelier</div>
+  <p class="subline">
+    Photograph any wine bottle, get a verdict on whether you'll love it,
+    and discover bottles tailored to your palate.
+  </p>
+  <div class="cta-row">
+    <a href="#mockup" class="btn btn-primary">View the Mockup →</a>
+    <a href="https://github.com/Giranimo/WineMind" class="btn btn-outline">⌥ View on GitHub</a>
+  </div>
+</div>
+
+<!-- Features -->
+<section>
+  <div class="section-header">
+    <div class="label">WHAT IT DOES</div>
+    <h2>Wine knowledge in your pocket</h2>
+  </div>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="icon">📷</div>
+      <h3>Scan any label</h3>
+      <p>Apple Vision reads the wine name, vintage, variety, and region — on-device, no API key needed.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">✦</div>
+      <h3>Verdict, not numbers</h3>
+      <p>"You'll Love This," "Worth a Try," "Probably Skip" — a clear word, not a score.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">★</div>
+      <h3>Taste calibration</h3>
+      <p>Quick 6-question quiz gives accurate predictions from your very first scan.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">☁</div>
+      <h3>Synced cellar</h3>
+      <p>CloudKit keeps your collection in sync across all your Apple devices, privately.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">👥</div>
+      <h3>Community picks</h3>
+      <p>Anonymized ratings power recommendations from people with similar taste to yours.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon">🍷</div>
+      <h3>Dark cellar UI</h3>
+      <p>Burgundy, gold, and serif fonts. Designed to feel like a sommelier's notebook.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Mockup -->
+<section id="mockup">
+  <div class="section-header">
+    <div class="label">SEE IT IN ACTION</div>
+    <h2>Interactive Mockup</h2>
+  </div>
+
+  <div class="mockup-preview">
+    <iframe src="mockup.html" title="WineMind interactive mockup"></iframe>
+  </div>
+
+  <div class="mockup-actions">
+    <a href="mockup.html" class="btn btn-outline" target="_blank">Open Full Mockup ↗</a>
+  </div>
+</section>
+
+<!-- How it works -->
+<section>
+  <div class="section-header">
+    <div class="label">HOW IT WORKS</div>
+    <h2>From label to verdict in seconds</h2>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <h3>Take the quiz</h3>
+      <p>One-time 6-question calibration to learn your palate.</p>
+    </div>
+    <div class="step">
+      <h3>Snap the label</h3>
+      <p>Apple Vision reads the wine details right from your photo.</p>
+    </div>
+    <div class="step">
+      <h3>Get the verdict</h3>
+      <p>The predictor combines your profile with community data.</p>
+    </div>
+    <div class="step">
+      <h3>Rate & remember</h3>
+      <p>Save your score and notes — they sharpen future predictions.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Tech -->
+<section>
+  <div class="section-header">
+    <div class="label">BUILT WITH</div>
+    <h2>Native iOS, no shortcuts</h2>
+  </div>
+
+  <div class="tech-pills">
+    <div class="pill"><span class="gold">SwiftUI</span> · UI framework</div>
+    <div class="pill"><span class="gold">SwiftData</span> · Local storage</div>
+    <div class="pill"><span class="gold">Apple Vision</span> · Free on-device OCR</div>
+    <div class="pill"><span class="gold">NaturalLanguage</span> · Tasting note similarity</div>
+    <div class="pill"><span class="gold">CloudKit</span> · Free cloud sync</div>
+    <div class="pill"><span class="gold">Sign in with Apple</span> · Auth</div>
+  </div>
+</section>
+
+<footer>
+  <div>Built with care · <a href="https://github.com/Giranimo/WineMind">Source on GitHub</a></div>
+  <div style="margin-top: 8px;">Mockup styled with Playfair Display + Inter · Dark wine cellar palette</div>
+</footer>
+
+</body>
+</html>
