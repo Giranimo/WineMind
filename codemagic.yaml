@@ -58,7 +58,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - suh@schultz.dk
+          - suneheide@gmail.com
         notify:
           success: true
           failure: true
