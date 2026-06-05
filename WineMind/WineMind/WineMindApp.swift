@@ -8,6 +8,23 @@ struct WineMindApp: App {
     @StateObject private var profileStore = TasteProfileStore.shared
     @StateObject private var consentStore = PrivacyConsentStore.shared
 
+    /// Local-only SwiftData store. SwiftData's automatic CloudKit mirroring is
+    /// deliberately disabled: all CloudKit sync is handled separately and
+    /// consent-gated by CloudKitService/WineSyncService. Letting SwiftData
+    /// auto-mirror would (a) sync wines to iCloud regardless of consent and
+    /// (b) crash at launch, since the Wine model isn't CloudKit-schema-compatible
+    /// (non-optional properties without defaults).
+    private let modelContainer: ModelContainer
+
+    init() {
+        do {
+            let config = ModelConfiguration(cloudKitDatabase: .none)
+            modelContainer = try ModelContainer(for: Wine.self, configurations: config)
+        } catch {
+            fatalError("Failed to create ModelContainer: \(error)")
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -30,6 +47,6 @@ struct WineMindApp: App {
             }
             .preferredColorScheme(.dark)
         }
-        .modelContainer(for: Wine.self)
+        .modelContainer(modelContainer)
     }
 }
