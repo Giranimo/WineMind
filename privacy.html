@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WineMind — Privacy Policy</title>
+<meta name="description" content="WineMind privacy policy — private by default. Your wine collection lives in your private iCloud, not on any server we control.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #120D10;
+    --surface: #1C141A;
+    --surface-elev: #261B21;
+    --burgundy: #732033;
+    --bordeaux: #8C1F33;
+    --gold: #D4B16B;
+    --champagne: #F2DEB5;
+    --cream: #F5EEE0;
+    --muted: #AE9E94;
+    --dim: #7A716B;
+    --divider: #382E33;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: linear-gradient(180deg, #0A0608 0%, #1A0E12 100%);
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--cream);
+    line-height: 1.7;
+  }
+
+  /* Header */
+  .page-header {
+    text-align: center;
+    padding: 70px 20px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '🍷';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    font-size: 280px;
+    color: var(--burgundy);
+    opacity: 0.05;
+    pointer-events: none;
+  }
+  .logo-circle {
+    width: 84px; height: 84px;
+    background: linear-gradient(180deg, var(--bordeaux), var(--burgundy));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    box-shadow: 0 0 50px rgba(115, 32, 51, 0.6);
+    margin: 0 auto 20px;
+    position: relative; z-index: 1;
+  }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 56px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    position: relative; z-index: 1;
+  }
+  .page-header .meta {
+    color: var(--gold);
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-top: 12px;
+    position: relative; z-index: 1;
+  }
+  .gold-divider {
+    display: flex; align-items: center; justify-content: center;
+    gap: 10px; margin: 22px auto 0; width: 160px;
+    position: relative; z-index: 1;
+  }
+  .gold-divider::before, .gold-divider::after {
+    content: ''; flex: 1; height: 1px;
+    background: rgba(212, 177, 107, 0.4);
+  }
+  .gold-divider span { color: var(--gold); font-size: 10px; }
+
+  /* Content */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 20px 24px 40px;
+  }
+  .summary {
+    background: linear-gradient(135deg, var(--surface-elev), var(--surface));
+    border: 0.5px solid rgba(212, 177, 107, 0.35);
+    border-left: 3px solid var(--gold);
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-bottom: 40px;
+    color: var(--champagne);
+    font-size: 16px;
+  }
+  .summary .label {
+    display: block;
+    font-size: 11px; letter-spacing: 3px; font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(24px, 4vw, 32px);
+    color: var(--cream);
+    font-weight: 700;
+    margin: 48px 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 0.5px solid var(--divider);
+  }
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    color: var(--gold);
+    font-weight: 600;
+    margin: 28px 0 8px;
+  }
+  p { color: var(--cream); margin: 12px 0; }
+  ul { margin: 12px 0 12px 4px; padding-left: 22px; }
+  li { color: var(--cream); margin: 7px 0; }
+  li::marker { color: var(--gold); }
+  strong { color: var(--champagne); font-weight: 600; }
+  em { color: var(--muted); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 0.5px solid var(--divider);
+    font-size: 14.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--divider);
+    vertical-align: top;
+  }
+  th {
+    background: var(--surface-elev);
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  tr:last-child td { border-bottom: 0; }
+  td:first-child { color: var(--champagne); font-weight: 500; white-space: nowrap; }
+
+  .hr {
+    height: 1px;
+    background: var(--divider);
+    border: 0;
+    margin: 44px 0;
+  }
+  .closing-note {
+    color: var(--dim);
+    font-style: italic;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  footer {
+    padding: 50px 20px 40px;
+    text-align: center;
+    border-top: 0.5px solid var(--divider);
+    margin-top: 40px;
+    color: var(--dim);
+    font-size: 13px;
+  }
+  footer a { color: var(--gold); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    td:first-child { white-space: normal; }
+    main { padding: 16px 18px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="logo-circle">🍷</div>
+  <h1>Privacy Policy</h1>
+  <div class="meta">Last updated: 2026-06-05 · Policy version 1</div>
+  <div class="gold-divider"><span>◆</span></div>
+</header>
+
+<main>
+
+  <div class="summary">
+    <span class="label">PLAIN-ENGLISH SUMMARY</span>
+    WineMind is designed to be private by default. Your wine collection lives in your private
+    iCloud — not on any server we control. The only data ever shared with anyone else is
+    anonymized rating data, and only if you explicitly opt in.
+  </div>
+
+  <h2>What data we collect</h2>
+
+  <h3>On your device (always)</h3>
+  <ul>
+    <li><strong>Wines you save</strong> — name, winery, variety, region, vintage, your score, your tasting notes, and the photo you take</li>
+    <li><strong>Taste profile</strong> from the one-time calibration quiz</li>
+    <li><strong>Privacy consent choices</strong> (which permissions you've granted)</li>
+    <li><strong>An anonymous contributor UUID</strong> stored in iOS Keychain (only used if you opt into community contributions)</li>
+  </ul>
+
+  <h3>In your private iCloud (only if you opt into iCloud Sync)</h3>
+  <p>All of the above. Stored in CloudKit's private database, which is encrypted with your iCloud key. Apple cannot read it. We cannot read it. Only you can.</p>
+
+  <h3>In the public community pool (only if you opt into "Contribute Anonymously")</h3>
+  <p>Per rated wine, we publish:</p>
+  <ul>
+    <li>Wine name, winery, variety, region, vintage</li>
+    <li>Your numeric score (1–10)</li>
+    <li>Color, body, sweetness</li>
+    <li>An opaque, locally-generated anonymous ID</li>
+  </ul>
+  <p>We <strong>never</strong> publish: tasting notes, photos, your name, email, Apple ID, location, device ID, the date you tried the wine, or any identifier that could link the rating to you.</p>
+
+  <h2>What we do not collect</h2>
+  <ul>
+    <li>Crash reports</li>
+    <li>Analytics events</li>
+    <li>Advertising identifiers</li>
+    <li>Your location (the app never requests it)</li>
+    <li>Your contacts</li>
+    <li>Anything outside this app</li>
+  </ul>
+
+  <h2>Third parties</h2>
+  <p>WineMind communicates only with Apple's iCloud service. We do <strong>not</strong> use Google Analytics, Firebase, Mixpanel, Facebook, Twitter, Stripe, RevenueCat, or any external AI/ML/SDK. The wine label recognition runs entirely on-device using Apple Vision.</p>
+
+  <h2>Your GDPR rights</h2>
+  <p>Under EU/UK GDPR (and equivalent regimes in the UK, Switzerland, California, etc.) you have the right to:</p>
+  <table>
+    <thead>
+      <tr><th>Right</th><th>How to exercise it in the app</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Access</strong></td><td>Settings → Manage Your Data → Export My Data (downloads a JSON archive of everything we hold about you)</td></tr>
+      <tr><td><strong>Rectification</strong></td><td>Edit any wine, quiz answer, or consent toggle at any time</td></tr>
+      <tr><td><strong>Erasure</strong> ("right to be forgotten")</td><td>Settings → Manage Your Data → Delete Everything (permanent, instant)</td></tr>
+      <tr><td><strong>Restrict processing</strong></td><td>Toggle off community contribution in Settings — your data stays only on your device</td></tr>
+      <tr><td><strong>Portability</strong></td><td>The exported JSON file is machine-readable and standardized</td></tr>
+      <tr><td><strong>Object</strong></td><td>Decline any optional permission with no impact on app function</td></tr>
+      <tr><td><strong>Withdraw consent</strong></td><td>Revoke any granular permission at any time in Settings</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Lawful basis for processing</h2>
+  <p>We rely on <strong>consent</strong> (GDPR Article 6(1)(a)) for all optional data processing. The base app (offline wine tracking) requires no personal data beyond what you voluntarily enter, and uses no third-party processors.</p>
+
+  <h2>Data retention</h2>
+  <p>Your data lives on your device until you delete it. There is no server-side retention because there is no server we control. If you opt into community contributions, your anonymous ratings remain in CloudKit's public pool until you delete your account — which removes them too, identified by your local contributor UUID.</p>
+
+  <h2>Children</h2>
+  <p>WineMind is intended for users <strong>18 and older</strong> (wine, after all). We do not knowingly collect data from anyone under 18.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>When we update this policy, the version number is bumped and the app will require you to re-consent on next launch.</p>
+
+  <h2>Contact</h2>
+  <p>For privacy questions or rights requests, email the developer address listed in App Store Connect for this app.</p>
+
+  <hr class="hr">
+  <p class="closing-note">This document is also presented in-app at Settings → Manage Your Data → Read full privacy policy.</p>
+
+</main>
+
+<footer>
+  <div><a href="index.html">← Back to WineMind</a> · <a href="https://github.com/Giranimo/WineMind">Source on GitHub</a></div>
+  <div style="margin-top: 8px;">WineMind · Dark wine cellar palette</div>
+</footer>
+
+</body>
+</html>

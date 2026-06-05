@@ -34,24 +34,18 @@ workflows:
         script: |
           xcodegen generate
 
-      - name: Set up code signing
+      # No signing in the dev workflow — this is a pure compile/sanity check.
+      # (build-ipa archives + exports an .ipa, which REQUIRES signing; signing
+      #  is only set up in the TestFlight workflow below.)
+      - name: Build iOS app (compile check, unsigned)
         script: |
-          xcode-project use-profiles
-
-      - name: Increment build number
-        script: |
-          cd $CM_BUILD_DIR
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$BUNDLE_ID" || echo "0")
-          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
-
-      - name: Build iOS app (unsigned, for testing)
-        script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          xcodebuild build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
 
     artifacts:
-      - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.app
 
