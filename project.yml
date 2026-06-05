@@ -28,22 +28,23 @@ targets:
     platform: iOS
     deploymentTarget: "17.0"
     sources:
-      - path: WineMind
+      # Source files live under WineMind/WineMind/. Info.plist and the
+      # entitlements are excluded here so they aren't copied as resources —
+      # they're wired in explicitly below. Assets.xcassets and
+      # PrivacyInfo.xcprivacy are auto-included by XcodeGen as resources.
+      - path: WineMind/WineMind
         excludes:
           - "Info.plist"
           - "WineMind.entitlements"
-    resources:
-      - path: WineMind/Assets.xcassets
-      - path: WineMind/PrivacyInfo.xcprivacy
     info:
-      path: WineMind/Info.plist
+      path: WineMind/WineMind/Info.plist
     entitlements:
-      path: WineMind/WineMind.entitlements
+      path: WineMind/WineMind/WineMind.entitlements
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.winemind.app
-        INFOPLIST_FILE: WineMind/Info.plist
-        CODE_SIGN_ENTITLEMENTS: WineMind/WineMind.entitlements
+        INFOPLIST_FILE: WineMind/WineMind/Info.plist
+        CODE_SIGN_ENTITLEMENTS: WineMind/WineMind/WineMind.entitlements
         TARGETED_DEVICE_FAMILY: "1"  # iPhone only
         SUPPORTS_MACCATALYST: "NO"
         SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD: "NO"
