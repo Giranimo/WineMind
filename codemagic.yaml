@@ -87,8 +87,18 @@ workflows:
       - name: Generate Xcode project
         script: xcodegen generate
 
-      - name: Set up code signing
-        script: xcode-project use-profiles
+      - name: Set up code signing (create cert + profile if missing)
+        script: |
+          # Fetch the App Store distribution cert + provisioning profile,
+          # creating them via the App Store Connect API if they don't exist
+          # yet (no Mac / CSR required). Requires the App Store Connect API
+          # key to have the App Manager (or Admin) role.
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+          keychain initialize
+          keychain add-certificates
+          xcode-project use-profiles
 
       - name: Increment build number
         script: |
