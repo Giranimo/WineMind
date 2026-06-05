@@ -155,6 +155,12 @@ workflows:
     publishing:
       app_store_connect:
         auth: integration
-        submit_to_testflight: true
-        beta_groups:
-          - App Store Connect Users
+        # Upload to App Store Connect only. The build is then immediately
+        # available to INTERNAL testers (no Beta App Review needed).
+        # External distribution requires Beta App Review + a real external
+        # beta group — re-enable below once you've created one in App Store
+        # Connect and you're ready for public testers:
+        #   submit_to_testflight: true
+        #   beta_groups:
+        #     - <your external group name>
+        submit_to_testflight: false
