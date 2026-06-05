@@ -68,6 +68,12 @@ workflows:
     # with "No matching profiles found" when no profile exists yet. Instead we
     # create the cert + profile ourselves in the script below.
     environment:
+      groups:
+        # Codemagic env-var group that must contain CERTIFICATE_PRIVATE_KEY
+        # (a PEM RSA private key). app-store-connect uses it to create/reuse
+        # the iOS distribution certificate. Create the group + var in the
+        # Codemagic UI (see repo notes / chat for the one-time setup).
+        - appstore_credentials
       xcode: latest
       vars:
         BUNDLE_ID: "com.winemind.app"
@@ -90,14 +96,16 @@ workflows:
 
       - name: Set up code signing (create cert + profile if missing)
         script: |
-          # Create the build keychain FIRST, then fetch the App Store
-          # distribution cert + provisioning profile, creating them via the
-          # App Store Connect API if they don't exist yet (no Mac / CSR
-          # required). Requires the App Store Connect API key to have the
-          # App Manager (or Admin) role.
+          # Create the build keychain FIRST, then fetch/create the App Store
+          # distribution certificate + provisioning profile via the App Store
+          # Connect API (no Mac / CSR required). Creating a certificate needs
+          # a private key — supplied via CERTIFICATE_PRIVATE_KEY (PEM) from the
+          # appstore_credentials env group; without it the build fails with
+          # "Cannot save Signing Certificates without certificate private key".
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
+            --certificate-key=@env:CERTIFICATE_PRIVATE_KEY \
             --create \
             --verbose
           keychain add-certificates
