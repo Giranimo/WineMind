@@ -20,6 +20,8 @@ settings:
     CODE_SIGN_STYLE: Manual
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
+    # Required for `agvtool new-version` to actually update the build number in CI.
+    VERSIONING_SYSTEM: "apple-generic"
     ENABLE_PREVIEWS: "YES"
     SWIFT_EMIT_LOC_STRINGS: "YES"
     GENERATE_INFOPLIST_FILE: "NO"

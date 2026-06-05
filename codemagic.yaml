@@ -115,10 +115,24 @@ workflows:
           security find-identity -v -p codesigning || true
           xcode-project use-profiles --verbose
 
-      - name: Increment build number
+      - name: Set unique build number
         script: |
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$BUNDLE_ID" || echo "0")
-          agvtool new-version -all $(($LATEST_BUILD_NUMBER + 1))
+          # The build number (CFBundleVersion) must be unique & increasing for
+          # each upload of a given version, or App Store Connect rejects it with
+          # "an attribute with a value that has already been used".
+          # Use the higher of (App Store latest + 1) and Codemagic's monotonic
+          # $BUILD_NUMBER, so we never collide with an already-uploaded build
+          # even if the App Store lookup fails. (project.yml sets
+          # VERSIONING_SYSTEM=apple-generic so agvtool actually applies this.)
+          LATEST=$(app-store-connect get-latest-app-store-build-number "$BUNDLE_ID" 2>/dev/null || echo 0)
+          if [ "$LATEST" -ge "$BUILD_NUMBER" ]; then
+            NEXT=$((LATEST + 1))
+          else
+            NEXT=$BUILD_NUMBER
+          fi
+          echo "App Store latest=$LATEST, Codemagic BUILD_NUMBER=$BUILD_NUMBER -> using build $NEXT"
+          agvtool new-version -all "$NEXT"
+          agvtool what-version
 
       - name: Build signed iOS app
         script: |
