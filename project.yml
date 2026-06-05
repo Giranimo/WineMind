@@ -40,10 +40,12 @@ targets:
         excludes:
           - "Info.plist"
           - "WineMind.entitlements"
-    info:
-      path: WineMind/WineMind/Info.plist
-    entitlements:
-      path: WineMind/WineMind/WineMind.entitlements
+    # NOTE: deliberately NO `info:` or `entitlements:` blocks here. Those make
+    # XcodeGen *generate* (overwrite) the files from scratch, discarding our
+    # hand-written Info.plist (UILaunchScreen, ITSAppUsesNonExemptEncryption,
+    # usage strings) and entitlements (Sign in with Apple, iCloud). Instead we
+    # point at the real committed files via INFOPLIST_FILE / CODE_SIGN_ENTITLEMENTS
+    # below, and exclude them from sources above so they aren't copied as resources.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.winemind.app
