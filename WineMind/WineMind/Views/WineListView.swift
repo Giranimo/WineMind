@@ -145,26 +145,7 @@ struct WineRowView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            if let photo = wine.photo {
-                Image(uiImage: photo)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 72, height: 96)
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay {
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(WineTheme.gold.opacity(0.3), lineWidth: 0.5)
-                    }
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(WineTheme.surfaceElevated)
-                    .frame(width: 72, height: 96)
-                    .overlay {
-                        Image(systemName: "wineglass")
-                            .font(.title)
-                            .foregroundStyle(WineTheme.burgundy.opacity(0.5))
-                    }
-            }
+            WineThumbnail(id: wine.id, photoData: wine.photoData)
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(wine.name.isEmpty ? "Unknown Wine" : wine.name)
@@ -207,6 +188,42 @@ struct WineRowView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(WineTheme.divider, lineWidth: 0.5)
+        }
+    }
+}
+
+/// Renders a cellar-row thumbnail. Decoding/downsampling happens off the main
+/// thread via ThumbnailCache, so scrolling never decodes full-resolution photos.
+private struct WineThumbnail: View {
+    let id: UUID
+    let photoData: Data?
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                Rectangle()
+                    .fill(WineTheme.surfaceElevated)
+                    .overlay {
+                        Image(systemName: "wineglass")
+                            .font(.title)
+                            .foregroundStyle(WineTheme.burgundy.opacity(0.5))
+                    }
+            }
+        }
+        .frame(width: 72, height: 96)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(WineTheme.gold.opacity(0.3), lineWidth: 0.5)
+        }
+        .task(id: id) {
+            guard let photoData else { image = nil; return }
+            image = await ThumbnailCache.shared.thumbnail(for: id, data: photoData)
         }
     }
 }

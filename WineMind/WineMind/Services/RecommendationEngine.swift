@@ -11,6 +11,11 @@ struct WineRecommendation: Identifiable {
 
 struct RecommendationEngine {
 
+    /// Loaded once and reused. NLEmbedding.sentenceEmbedding(for:) is expensive to
+    /// construct, and notesSimilarity is called for every pairwise wine comparison —
+    /// re-creating it each call was a major cost.
+    private static let englishSentenceEmbedding = NLEmbedding.sentenceEmbedding(for: .english)
+
     // MARK: - Main Recommendations
 
     /// Build personalized recommendations from the user's rated collection
@@ -274,7 +279,7 @@ struct RecommendationEngine {
 
     /// Compare tasting notes using Apple NaturalLanguage embedding distance
     private func notesSimilarity(_ textA: String, _ textB: String) -> Double {
-        if let embedding = NLEmbedding.sentenceEmbedding(for: .english) {
+        if let embedding = Self.englishSentenceEmbedding {
             let distance = embedding.distance(between: textA.lowercased(), and: textB.lowercased())
             // NLEmbedding distance is 0 (identical) to 2 (opposite)
             // Convert to 0-1 similarity
