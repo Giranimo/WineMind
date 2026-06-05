@@ -13,6 +13,10 @@ struct CameraCaptureView: View {
     @State private var showingCameraPicker = false
     @State private var showingLibraryPicker = false
 
+    /// Called when the whole add-wine flow is done (wine saved) so the entire
+    /// nested cover stack collapses back to the Cellar.
+    let onFinished: () -> Void
+
     private let recognitionService = WineRecognitionService()
 
     var body: some View {
@@ -51,7 +55,8 @@ struct CameraCaptureView: View {
                 if let info = wineInfo {
                     WinePredictionView(
                         wineInfo: info,
-                        photoData: capturedImage?.jpegData(compressionQuality: 0.8)
+                        photoData: capturedImage?.jpegData(compressionQuality: 0.8),
+                        onFinished: onFinished
                     )
                 }
             }
@@ -59,7 +64,8 @@ struct CameraCaptureView: View {
                 if let info = wineInfo {
                     WineScoringView(
                         wineInfo: info,
-                        photoData: capturedImage?.jpegData(compressionQuality: 0.8)
+                        photoData: capturedImage?.jpegData(compressionQuality: 0.8),
+                        onFinished: onFinished
                     )
                 }
             }

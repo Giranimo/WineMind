@@ -8,6 +8,7 @@ struct WinePredictionView: View {
 
     let wineInfo: WineInfo
     let photoData: Data?
+    let onFinished: () -> Void
 
     @State private var prediction: WinePrediction?
     @State private var showingScoring = false
@@ -35,7 +36,7 @@ struct WinePredictionView: View {
                 }
             }
             .fullScreenCover(isPresented: $showingScoring) {
-                WineScoringView(wineInfo: wineInfo, photoData: photoData)
+                WineScoringView(wineInfo: wineInfo, photoData: photoData, onFinished: onFinished)
             }
             .task {
                 prediction = predictor.predict(

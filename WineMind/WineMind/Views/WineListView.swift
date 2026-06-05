@@ -60,7 +60,7 @@ struct WineListView: View {
             }
             .searchable(text: $searchText, prompt: "Search your cellar...")
             .fullScreenCover(isPresented: $showingCamera) {
-                CameraCaptureView()
+                CameraCaptureView(onFinished: { showingCamera = false })
             }
         }
     }

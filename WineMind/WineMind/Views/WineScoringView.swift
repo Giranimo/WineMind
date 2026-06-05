@@ -7,6 +7,7 @@ struct WineScoringView: View {
     @EnvironmentObject var consentStore: PrivacyConsentStore
 
     let photoData: Data?
+    let onFinished: () -> Void
 
     @State private var name: String
     @State private var winery: String
@@ -19,8 +20,9 @@ struct WineScoringView: View {
     @State private var score: Double = 7.0
     @State private var notes: String = ""
 
-    init(wineInfo: WineInfo, photoData: Data?) {
+    init(wineInfo: WineInfo, photoData: Data?, onFinished: @escaping () -> Void) {
         self.photoData = photoData
+        self.onFinished = onFinished
         _name = State(initialValue: wineInfo.name)
         _winery = State(initialValue: wineInfo.winery)
         _variety = State(initialValue: wineInfo.variety)
@@ -29,6 +31,10 @@ struct WineScoringView: View {
         _color = State(initialValue: wineInfo.color)
         _body_ = State(initialValue: wineInfo.body)
         _sweetness = State(initialValue: wineInfo.sweetness)
+        // Pre-fill suggested tasting notes from the recognized grape (scanned wines)
+        _notes = State(initialValue: wineInfo.variety.isEmpty
+            ? ""
+            : WineCatalog.suggestedNotes(variety: wineInfo.variety, color: wineInfo.color))
     }
 
     var body: some View {
@@ -255,6 +261,6 @@ struct WineScoringView: View {
             }
         }
 
-        dismiss()
+        onFinished()
     }
 }

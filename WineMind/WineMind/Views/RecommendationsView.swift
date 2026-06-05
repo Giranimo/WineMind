@@ -17,6 +17,11 @@ struct RecommendationsView: View {
             .map { $0 }
     }
 
+    /// Bottles not in the cellar, matched to the user's taste — real discoveries.
+    var discoveries: [CatalogWine] {
+        WineCatalog.discoveries(notIn: wines)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -103,6 +108,10 @@ struct RecommendationsView: View {
 
                 topWinesSection
 
+                if !discoveries.isEmpty {
+                    youMightLike
+                }
+
                 if !recommender.publicRecommendations.isEmpty {
                     communityRecommendations
                 }
@@ -180,6 +189,60 @@ struct RecommendationsView: View {
                     CommunityRecommendationRow(recommendation: rec)
                         .padding(.horizontal)
                 }
+            }
+        }
+    }
+
+    private var youMightLike: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionHeader("You Might Like", icon: "sparkles")
+
+            VStack(spacing: 12) {
+                ForEach(discoveries) { wine in
+                    CatalogRecommendationRow(wine: wine)
+                        .padding(.horizontal)
+                }
+            }
+        }
+    }
+
+    private struct CatalogRecommendationRow: View {
+        let wine: CatalogWine
+
+        var body: some View {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(WineTheme.surfaceElevated)
+                        .frame(width: 44, height: 60)
+                    Image(systemName: wine.color.systemImage)
+                        .foregroundStyle(WineTheme.gold)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(wine.name)
+                        .font(.wineTitle3)
+                        .foregroundStyle(WineTheme.cream)
+                        .lineLimit(1)
+                    if !wine.winery.isEmpty {
+                        Text(wine.winery)
+                            .font(.wineSubheadline)
+                            .italic()
+                            .foregroundStyle(WineTheme.gold)
+                            .lineLimit(1)
+                    }
+                    Text([wine.variety, wine.region].filter { !$0.isEmpty }.joined(separator: " · "))
+                        .font(.wineCaption)
+                        .foregroundStyle(WineTheme.mutedText)
+                        .lineLimit(1)
+                }
+                Spacer()
+            }
+            .padding(14)
+            .background(WineTheme.cardGradient)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay {
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(WineTheme.divider, lineWidth: 0.5)
             }
         }
     }
