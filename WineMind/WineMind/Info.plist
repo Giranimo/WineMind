@@ -4,14 +4,14 @@
 <dict>
     <key>CFBundleDisplayName</key>
     <string>WineMind</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(MARKETING_VERSION)</string>
+    <key>CFBundleVersion</key>
+    <string>$(CURRENT_PROJECT_VERSION)</string>
     <key>NSCameraUsageDescription</key>
     <string>WineMind needs camera access to photograph wine labels for recognition.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>WineMind needs photo library access to select wine label photos.</string>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>remote-notification</string>
-    </array>
     <key>UIRequiredDeviceCapabilities</key>
     <array>
         <string>arm64</string>

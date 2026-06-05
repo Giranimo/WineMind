@@ -34,6 +34,7 @@ targets:
           - "WineMind.entitlements"
     resources:
       - path: WineMind/Assets.xcassets
+      - path: WineMind/PrivacyInfo.xcprivacy
     info:
       path: WineMind/Info.plist
     entitlements:
@@ -52,4 +53,3 @@ targets:
       - SignInWithApple
       - iCloud:
           - CloudKit
-      - PushNotifications

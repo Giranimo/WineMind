@@ -58,7 +58,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - YOUR_EMAIL_HERE  # change this to your email
+          - suh@schultz.dk
         notify:
           success: true
           failure: true
