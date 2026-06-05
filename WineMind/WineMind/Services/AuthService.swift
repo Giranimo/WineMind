@@ -20,7 +20,9 @@ final class AuthService: NSObject, ObservableObject {
     override init() {
         super.init()
         loadStoredCredentials()
-        Task { await checkCloudKitStatus() }
+        // Deliberately do NOT touch CloudKit here. CloudKit is only accessed from
+        // consent-gated paths (sync / recommendations / contribution / the Settings
+        // status row), so an iCloud/CloudKit misconfiguration can never crash launch.
     }
 
     // MARK: - Stored Credentials
@@ -73,8 +75,6 @@ final class AuthService: NSObject, ObservableObject {
                 userEmail = credential.email
                 isSignedIn = true
                 errorMessage = nil
-
-                Task { await checkCloudKitStatus() }
             }
         case .failure(let error):
             if (error as NSError).code != ASAuthorizationError.canceled.rawValue {

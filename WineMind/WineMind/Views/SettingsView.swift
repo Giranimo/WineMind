@@ -4,6 +4,7 @@ import SwiftData
 struct SettingsView: View {
     @EnvironmentObject var auth: AuthService
     @EnvironmentObject var profileStore: TasteProfileStore
+    @EnvironmentObject var consentStore: PrivacyConsentStore
     @Query private var wines: [Wine]
     @State private var showingSignOutConfirmation = false
     @State private var showingQuiz = false
@@ -57,6 +58,13 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Profile")
+            .task {
+                // Only query iCloud account status if the user has opted into cloud
+                // sync — otherwise we never touch CloudKit at all.
+                if consentStore.consent.allowsCloudSync {
+                    await auth.checkCloudKitStatus()
+                }
+            }
             .fullScreenCover(isPresented: $showingQuiz) {
                 TasteQuizView()
                     .environmentObject(profileStore)
@@ -139,7 +147,7 @@ struct SettingsView: View {
                     .font(.title2)
                     .foregroundStyle(cloudKitColor)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(auth.cloudKitStatusMessage)
+                    Text(consentStore.consent.allowsCloudSync ? auth.cloudKitStatusMessage : "iCloud sync is off")
                         .font(.wineBody)
                         .foregroundStyle(WineTheme.cream)
                     Text("Wine collection syncs across your devices")
