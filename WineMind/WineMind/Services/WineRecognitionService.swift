@@ -62,15 +62,25 @@ actor WineRecognitionService {
         let allTextLower = allText.lowercased()
 
         let vintage = findVintage(in: lines)
-        let variety = findVariety(in: allTextLower)
-        let region = findRegion(in: allTextLower)
-        let color = guessColor(variety: variety, text: allTextLower)
-        let body = guessBody(variety: variety)
-        let sweetness = guessSweetness(variety: variety, text: allTextLower)
+        var variety = findVariety(in: allTextLower)
+        var region = findRegion(in: allTextLower)
 
         // The wine name is typically the most prominent text (first or second line)
         // The winery is usually near the top too
-        let (name, winery) = findNameAndWinery(lines: lines, variety: variety, region: region, vintage: vintage)
+        var (name, winery) = findNameAndWinery(lines: lines, variety: variety, region: region, vintage: vintage)
+
+        // Cross-reference the bundled catalog: if a known producer appears in the
+        // OCR text, use that entry to fill any fields the heuristics missed.
+        if let match = catalogMatch(in: allTextLower) {
+            if winery.isEmpty { winery = match.winery }
+            if variety.isEmpty { variety = match.variety }
+            if region.isEmpty { region = match.region }
+            if name.isEmpty { name = match.name }
+        }
+
+        let color = guessColor(variety: variety, text: allTextLower)
+        let body = guessBody(variety: variety)
+        let sweetness = guessSweetness(variety: variety, text: allTextLower)
 
         return WineInfo(
             name: name,
@@ -82,6 +92,16 @@ actor WineRecognitionService {
             body: body,
             sweetness: sweetness
         )
+    }
+
+    /// Match the OCR text against known producers in the bundled catalog,
+    /// longest winery name first to avoid partial collisions.
+    private func catalogMatch(in text: String) -> CatalogWine? {
+        let byWineryLength = WineCatalog.all.sorted { $0.winery.count > $1.winery.count }
+        for wine in byWineryLength where !wine.winery.isEmpty {
+            if text.contains(wine.winery.lowercased()) { return wine }
+        }
+        return nil
     }
 
     private func findVintage(in lines: [String]) -> Int {

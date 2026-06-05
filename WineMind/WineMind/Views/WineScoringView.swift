@@ -4,6 +4,7 @@ import SwiftData
 struct WineScoringView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject var consentStore: PrivacyConsentStore
 
     let photoData: Data?
@@ -69,6 +70,16 @@ struct WineScoringView: View {
 
                         // Tasting notes
                         notesSection
+
+                        // Look up external reviews (opens Safari — nothing leaves
+                        // the device until you tap).
+                        Button { openReviews() } label: {
+                            Label("Find Reviews Online", systemImage: "magnifyingglass")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(WineButtonStyle())
+                        .padding(.horizontal)
+                        .disabled(name.isEmpty)
 
                         Spacer().frame(height: 20)
                     }
@@ -234,6 +245,16 @@ struct WineScoringView: View {
         .padding(12)
         .background(WineTheme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func openReviews() {
+        let query = [name, winery, vintage > 0 ? String(vintage) : ""]
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+        guard !query.isEmpty,
+              let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://www.vivino.com/search/wines?q=\(encoded)") else { return }
+        openURL(url)
     }
 
     private func saveWine() {
