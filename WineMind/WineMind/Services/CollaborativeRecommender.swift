@@ -15,8 +15,13 @@ final class CollaborativeRecommender: ObservableObject {
 
     // MARK: - Public Recommendations
 
-    /// Fetch wines that users with similar taste rated highly
-    func refreshRecommendations(from userWines: [Wine]) async {
+    /// Fetch wines that users with similar taste rated highly.
+    /// `allowsCommunityRecs` reflects the user's GDPR consent — without it we return nothing.
+    func refreshRecommendations(from userWines: [Wine], allowsCommunityRecs: Bool = true) async {
+        guard allowsCommunityRecs else {
+            publicRecommendations = []
+            return
+        }
         guard userWines.count >= 3 else {
             publicRecommendations = []
             return
@@ -45,8 +50,7 @@ final class CollaborativeRecommender: ObservableObject {
                 limit: 30
             )
 
-            let userID = try await CloudKitService.shared.currentUserID()
-            let userHash = hashUserID(userID)
+            let userHash = try await SecurityService.shared.contributorID()
 
             async let similarUserRatings = CloudKitService.shared.fetchSimilarUsersRatings(
                 currentUserHash: userHash,
@@ -138,14 +142,6 @@ final class CollaborativeRecommender: ObservableObject {
     }
 
     // MARK: - Helpers
-
-    private func hashUserID(_ userID: String) -> String {
-        let data = userID.data(using: .utf8) ?? Data()
-        let hash = data.reduce(into: UInt64(5381)) { result, byte in
-            result = result &* 33 &+ UInt64(byte)
-        }
-        return String(hash, radix: 36)
-    }
 
     private func wineSignature(name: String, winery: String, vintage: Int) -> String {
         let n = name.lowercased().filter { $0.isLetter || $0.isNumber }

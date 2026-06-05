@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Query private var wines: [Wine]
     @State private var showingSignOutConfirmation = false
     @State private var showingQuiz = false
+    @State private var showingManageData = false
 
     var body: some View {
         NavigationStack {
@@ -26,6 +27,9 @@ struct SettingsView: View {
 
                         // Taste profile
                         tasteProfileCard
+
+                        // Privacy & data
+                        privacyCard
 
                         // About
                         aboutCard
@@ -56,6 +60,9 @@ struct SettingsView: View {
             .fullScreenCover(isPresented: $showingQuiz) {
                 TasteQuizView()
                     .environmentObject(profileStore)
+            }
+            .sheet(isPresented: $showingManageData) {
+                ManageDataView()
             }
             .confirmationDialog("Sign out of WineMind?", isPresented: $showingSignOutConfirmation) {
                 Button("Sign Out", role: .destructive) { auth.signOut() }
@@ -225,6 +232,41 @@ struct SettingsView: View {
                             .stroke(WineTheme.gold.opacity(0.4), lineWidth: 0.5)
                     }
             }
+        }
+        .padding()
+        .background(WineTheme.cardGradient)
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal)
+    }
+
+    private var privacyCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Privacy & Data")
+
+            Button {
+                showingManageData = true
+            } label: {
+                HStack(spacing: 14) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.title3)
+                        .foregroundStyle(WineTheme.gold)
+                        .frame(width: 28)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Manage Your Data")
+                            .font(.wineBody.weight(.semibold))
+                            .foregroundStyle(WineTheme.cream)
+                        Text("Permissions, export, delete account")
+                            .font(.wineCaption)
+                            .foregroundStyle(WineTheme.mutedText)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(WineTheme.dimText)
+                }
+                .padding(.vertical, 8)
+            }
+            .buttonStyle(.plain)
         }
         .padding()
         .background(WineTheme.cardGradient)

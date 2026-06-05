@@ -8,7 +8,8 @@ final class WineSyncService {
 
     private let restoreCompleteKey = "winemind.cloudKitRestoreComplete"
 
-    func restoreIfNeeded(context: ModelContext) async {
+    func restoreIfNeeded(context: ModelContext, allowsCloudSync: Bool = true) async {
+        guard allowsCloudSync else { return }
         guard !UserDefaults.standard.bool(forKey: restoreCompleteKey) else { return }
 
         do {

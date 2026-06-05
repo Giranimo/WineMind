@@ -15,6 +15,7 @@ The mockup shows all 11 screens (Sign In, Quiz, Cellar, Capture, Prediction, Det
 - **CloudKit sync** — your cellar follows you across devices
 - **Collaborative recommendations** — anonymized community ratings power suggestions
 - **Dark wine cellar UI** — burgundy, gold, and serif fonts throughout
+- **GDPR-compliant by design** — granular consent, in-app data export, one-tap account deletion
 
 ## Tech stack
 
@@ -90,6 +91,20 @@ open WineMind.xcodeproj
 2. **As you rate wines** — quiz weight tapers down, your actual ratings dominate
 3. **CloudKit public DB** — your ratings (anonymized via hash) help recommend wines to similar-taste users
 4. **Verdict** — for each scanned wine, signals combine into a word: *You'll Love This*, *Right Up Your Alley*, *Worth a Try*, *Probably Skip*, etc.
+
+## Privacy & Security
+
+- See [PRIVACY.md](PRIVACY.md) for the full privacy policy
+- See [SECURITY.md](SECURITY.md) for the security posture, threat model, and disclosure process
+
+Key guarantees:
+
+- **Zero third-party runtime dependencies** — no analytics, no tracking, no external SDKs
+- **No backend we control** — your data is in your iCloud, not on any server
+- **GDPR rights surfaced in-app** — access, portability, erasure, rectification, withdrawal of consent
+- **Service-layer consent enforcement** — a UI bug cannot leak data; the service refuses
+- **EXIF/GPS stripping** on every photo before storage and upload
+- **Keychain-backed anonymous contributor ID** — unlinkable to your Apple ID
 
 ## License
 

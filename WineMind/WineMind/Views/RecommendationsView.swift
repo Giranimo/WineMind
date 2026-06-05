@@ -4,6 +4,7 @@ import SwiftData
 struct RecommendationsView: View {
     @Query private var wines: [Wine]
     @EnvironmentObject var recommender: CollaborativeRecommender
+    @EnvironmentObject var consentStore: PrivacyConsentStore
     @State private var localRecommendations: [WineRecommendation] = []
 
     private let engine = RecommendationEngine()
@@ -213,7 +214,10 @@ struct RecommendationsView: View {
 
     private func refreshAll() async {
         refreshLocal()
-        await recommender.refreshRecommendations(from: wines)
+        await recommender.refreshRecommendations(
+            from: wines,
+            allowsCommunityRecs: consentStore.consent.allowsCommunityRecommendations
+        )
     }
 
     private func refreshLocal() {

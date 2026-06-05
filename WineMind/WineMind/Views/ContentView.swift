@@ -4,6 +4,7 @@ import SwiftData
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var auth: AuthService
+    @EnvironmentObject var consentStore: PrivacyConsentStore
 
     init() {
         // Tab bar appearance — dark
@@ -48,7 +49,10 @@ struct ContentView: View {
         }
         .tint(WineTheme.gold)
         .task {
-            await WineSyncService.shared.restoreIfNeeded(context: modelContext)
+            await WineSyncService.shared.restoreIfNeeded(
+                context: modelContext,
+                allowsCloudSync: consentStore.consent.allowsCloudSync
+            )
         }
     }
 }

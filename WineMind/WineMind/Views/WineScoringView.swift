@@ -4,6 +4,7 @@ import SwiftData
 struct WineScoringView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var consentStore: PrivacyConsentStore
 
     let photoData: Data?
 
@@ -245,9 +246,13 @@ struct WineScoringView: View {
         )
         modelContext.insert(wine)
 
-        // Sync to CloudKit
-        Task {
-            try? await CloudKitService.shared.saveWine(wine)
+        // Sync to CloudKit only if the user has consented.
+        // Public contribution is gated by a separate, granular consent flag.
+        if consentStore.consent.allowsCloudSync {
+            let contributesAnonymously = consentStore.consent.allowsAnonymousContribution
+            Task {
+                try? await CloudKitService.shared.saveWine(wine, contributeAnonymously: contributesAnonymously)
+            }
         }
 
         dismiss()

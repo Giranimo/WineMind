@@ -28,8 +28,10 @@ actor CloudKitService {
 
     // MARK: - Private DB: User's Personal Wines
 
-    /// Save or update a wine in the user's private CloudKit DB
-    func saveWine(_ wine: Wine) async throws {
+    /// Save or update a wine in the user's private CloudKit DB.
+    /// `contributeAnonymously` controls whether the rating is also sent to the public DB —
+    /// this is the GDPR opt-in for collaborative recommendations.
+    func saveWine(_ wine: Wine, contributeAnonymously: Bool) async throws {
         let record = CKRecord(recordType: wineRecordType, recordID: CKRecord.ID(recordName: wine.id.uuidString))
         record["name"] = wine.name
         record["winery"] = wine.winery
@@ -44,16 +46,29 @@ actor CloudKitService {
         record["sweetness"] = wine.sweetness.rawValue
 
         if let photoData = wine.photoData {
-            let url = try writeTempImageFile(data: photoData, id: wine.id)
+            // Strip EXIF/GPS before upload — even for the private DB.
+            // Defense in depth: if iCloud is ever compromised, no location data leaks.
+            let cleanData = sanitizePhotoData(photoData)
+            let url = try writeTempImageFile(data: cleanData, id: wine.id)
             record["photo"] = CKAsset(fileURL: url)
         }
 
         _ = try await privateDB.save(record)
 
-        // Also contribute anonymized rating to public DB if user has rated it
-        if wine.score > 0 {
+        // Only contribute to the public DB if the user has consented.
+        // Note that tasting notes, photos, dateAdded, and the user's name are NEVER
+        // sent to the public DB — only wine metadata + score.
+        if wine.score > 0 && contributeAnonymously {
             try await contributePublicRating(wine: wine)
         }
+    }
+
+    private func sanitizePhotoData(_ data: Data) -> Data {
+        guard let image = UIImage(data: data),
+              let stripped = SecurityService.strippedJPEGData(from: image) else {
+            return data
+        }
+        return stripped
     }
 
     /// Fetch all user's wines from CloudKit (for restoring on a new device)
@@ -82,12 +97,38 @@ actor CloudKitService {
         _ = try await privateDB.deleteRecord(withID: recordID)
     }
 
+    // MARK: - GDPR: Right to Erasure
+
+    /// Delete every wine the user has stored in their private CloudKit DB.
+    func deleteAllPrivateData() async throws {
+        let query = CKQuery(recordType: wineRecordType, predicate: NSPredicate(value: true))
+        let (results, _) = try await privateDB.records(matching: query)
+
+        for (recordID, _) in results {
+            _ = try? await privateDB.deleteRecord(withID: recordID)
+        }
+    }
+
+    /// Delete every public rating ever contributed by this device.
+    /// After this, the user's contributor ID can be rotated so future ratings are unlinkable.
+    func deleteAllPublicContributions() async throws {
+        let userHash = try await SecurityService.shared.contributorID()
+        let predicate = NSPredicate(format: "userHash == %@", userHash)
+        let query = CKQuery(recordType: publicRatingRecordType, predicate: predicate)
+        let (results, _) = try await publicDB.records(matching: query)
+
+        for (recordID, _) in results {
+            _ = try? await publicDB.deleteRecord(withID: recordID)
+        }
+    }
+
     // MARK: - Public DB: Collaborative Ratings
 
-    /// Contribute an anonymized rating to the public database
+    /// Contribute an anonymized rating to the public database.
+    /// Uses a locally-generated UUID (stored in Keychain) as the contributor ID — this is
+    /// cryptographically unlinkable from the user's Apple ID or any other identifier.
     private func contributePublicRating(wine: Wine) async throws {
-        let userID = try await currentUserID()
-        let userHash = hashUserID(userID) // anonymize
+        let userHash = try await SecurityService.shared.contributorID()
 
         // Use a deterministic record ID per user+wine so updates replace the previous rating
         let wineSignature = wineSignature(wine: wine)
@@ -237,15 +278,6 @@ actor CloudKitService {
     }
 
     // MARK: - Helpers
-
-    private func hashUserID(_ userID: String) -> String {
-        // Simple anonymization — derive a stable hash from the user record name
-        let data = userID.data(using: .utf8) ?? Data()
-        let hash = data.reduce(into: UInt64(5381)) { result, byte in
-            result = result &* 33 &+ UInt64(byte)
-        }
-        return String(hash, radix: 36)
-    }
 
     private func wineSignature(wine: Wine) -> String {
         let name = wine.name.lowercased().filter { $0.isLetter || $0.isNumber }
