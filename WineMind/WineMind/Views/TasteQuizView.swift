@@ -15,19 +15,29 @@ struct TasteQuizView: View {
     @State private var selectedVarieties: Set<String> = []
     @State private var selectedRegions: Set<String> = []
     @State private var selectedExperience: WineExperience = .casual
+    @State private var selectedTannin: TanninPreference?
+    @State private var selectedOak: OakPreference?
 
-    private var totalSteps: Int { 7 }
+    private var totalSteps: Int { 9 }
 
     // Suggested options for variety/region (popular picks)
     private let varietyOptions = [
-        "Cabernet Sauvignon", "Pinot Noir", "Merlot", "Syrah",
+        "Cabernet Sauvignon", "Merlot", "Pinot Noir", "Syrah", "Malbec",
+        "Zinfandel", "Grenache", "Tempranillo", "Sangiovese", "Nebbiolo",
+        "Barbera", "Cabernet Franc",
         "Chardonnay", "Sauvignon Blanc", "Riesling", "Pinot Grigio",
-        "Malbec", "Tempranillo", "Sangiovese", "Champagne"
+        "Chenin Blanc", "Viognier", "Gewürztraminer", "Grüner Veltliner",
+        "Albariño", "Sémillon",
+        "Champagne", "Prosecco"
     ]
     private let regionOptions = [
-        "Bordeaux", "Burgundy", "Champagne", "Tuscany",
-        "Napa Valley", "Sonoma", "Rioja", "Mendoza",
-        "Barossa Valley", "Marlborough", "Mosel", "Douro"
+        "Bordeaux", "Burgundy", "Champagne", "Rhône Valley", "Loire Valley",
+        "Alsace", "Provence",
+        "Tuscany", "Piedmont", "Veneto", "Sicily",
+        "Rioja", "Ribera del Duero", "Priorat",
+        "Napa Valley", "Sonoma", "Willamette Valley", "Paso Robles",
+        "Mendoza", "Barossa Valley", "Margaret River",
+        "Marlborough", "Mosel", "Douro"
     ]
 
     var body: some View {
@@ -41,10 +51,12 @@ struct TasteQuizView: View {
                     welcomeStep.tag(0)
                     colorStep.tag(1)
                     bodyStep.tag(2)
-                    sweetnessStep.tag(3)
-                    flavorStep.tag(4)
-                    varietyStep.tag(5)
-                    experienceStep.tag(6)
+                    tanninStep.tag(3)
+                    oakStep.tag(4)
+                    sweetnessStep.tag(5)
+                    flavorStep.tag(6)
+                    varietyStep.tag(7)
+                    experienceStep.tag(8)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: currentStep)
@@ -114,7 +126,7 @@ struct TasteQuizView: View {
 
                     GoldDivider().frame(width: 100)
 
-                    Text("A quick 6-question quiz so we can\nrecommend wines you'll actually love")
+                    Text("A quick 8-question quiz so we can\nrecommend wines you'll actually love")
                         .font(.wineCallout)
                         .italic()
                         .multilineTextAlignment(.center)
@@ -171,6 +183,50 @@ struct TasteQuizView: View {
                             wide: true
                         ) {
                             selectedBody = body
+                        }
+                    }
+                }
+            )
+        )
+    }
+
+    private var tanninStep: some View {
+        quizStep(
+            title: "How do you like the texture?",
+            subtitle: "Tannins give red wine its grip",
+            content: AnyView(
+                VStack(spacing: 12) {
+                    ForEach(TanninPreference.allCases, id: \.self) { t in
+                        QuizCard(
+                            icon: t.icon,
+                            title: t.rawValue,
+                            subtitle: t.detail,
+                            isSelected: selectedTannin == t,
+                            wide: true
+                        ) {
+                            selectedTannin = t
+                        }
+                    }
+                }
+            )
+        )
+    }
+
+    private var oakStep: some View {
+        quizStep(
+            title: "Oaky or fresh?",
+            subtitle: "Oak adds vanilla, toast, and spice",
+            content: AnyView(
+                VStack(spacing: 12) {
+                    ForEach(OakPreference.allCases, id: \.self) { o in
+                        QuizCard(
+                            icon: o.icon,
+                            title: o.rawValue,
+                            subtitle: o.detail,
+                            isSelected: selectedOak == o,
+                            wide: true
+                        ) {
+                            selectedOak = o
                         }
                     }
                 }
@@ -352,10 +408,12 @@ struct TasteQuizView: View {
         case 0: return true
         case 1: return !selectedColors.isEmpty
         case 2: return selectedBody != nil
-        case 3: return selectedSweetness != nil
-        case 4: return true // flavors optional
-        case 5: return true // varieties/regions optional
-        case 6: return true
+        case 3: return true // tannin optional
+        case 4: return true // oak optional
+        case 5: return selectedSweetness != nil
+        case 6: return true // flavors optional
+        case 7: return true // varieties/regions optional
+        case 8: return true
         default: return false
         }
     }
@@ -368,7 +426,9 @@ struct TasteQuizView: View {
             preferredFlavors: selectedFlavors,
             preferredVarieties: selectedVarieties,
             preferredRegions: selectedRegions,
-            experience: selectedExperience
+            experience: selectedExperience,
+            preferredTannin: selectedTannin,
+            preferredOak: selectedOak
         )
         profileStore.save(final)
         dismiss()

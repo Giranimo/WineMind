@@ -10,6 +10,9 @@ struct TasteProfile: Codable, Equatable {
     var preferredVarieties: Set<String>
     var preferredRegions: Set<String>
     var experience: WineExperience
+    // Optional (added later) — keep optional so previously-saved profiles still decode.
+    var preferredTannin: TanninPreference? = nil
+    var preferredOak: OakPreference? = nil
 
     var isComplete: Bool {
         !preferredColors.isEmpty && preferredBody != nil && preferredSweetness != nil
@@ -33,6 +36,9 @@ enum FlavorProfile: String, Codable, CaseIterable, Hashable {
     case bright = "Bright & citrus"
     case floral = "Floral & delicate"
     case spicy = "Bold & spicy"
+    case mineral = "Mineral & saline"
+    case herbal = "Herbal & green"
+    case jammy = "Jammy & ripe"
 
     var icon: String {
         switch self {
@@ -42,6 +48,53 @@ enum FlavorProfile: String, Codable, CaseIterable, Hashable {
         case .bright: return "sun.max.fill"
         case .floral: return "camera.macro"
         case .spicy: return "flame.fill"
+        case .mineral: return "sparkles"
+        case .herbal: return "leaf.circle.fill"
+        case .jammy: return "drop.fill"
+        }
+    }
+}
+
+enum TanninPreference: String, Codable, CaseIterable {
+    case smooth = "Smooth & soft"
+    case balanced = "Balanced"
+    case structured = "Firm & structured"
+
+    var icon: String {
+        switch self {
+        case .smooth: return "circle.fill"
+        case .balanced: return "circle.lefthalf.filled"
+        case .structured: return "square.grid.3x3.fill"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .smooth: return "Silky and easy-drinking — Merlot, Pinot Noir"
+        case .balanced: return "Some grip, nicely balanced"
+        case .structured: return "Bold, gripping tannins — Cabernet, Nebbiolo"
+        }
+    }
+}
+
+enum OakPreference: String, Codable, CaseIterable {
+    case unoaked = "Fresh & unoaked"
+    case subtle = "Lightly oaked"
+    case oaked = "Rich & oaky"
+
+    var icon: String {
+        switch self {
+        case .unoaked: return "leaf"
+        case .subtle: return "tree"
+        case .oaked: return "flame.fill"
+        }
+    }
+
+    var detail: String {
+        switch self {
+        case .unoaked: return "Crisp and pure — Sauvignon Blanc, Riesling"
+        case .subtle: return "A touch of toast and spice"
+        case .oaked: return "Vanilla, toast, butter — oaked Chardonnay, big reds"
         }
     }
 }
