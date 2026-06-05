@@ -17,9 +17,10 @@ workflows:
         XCODE_PROJECT: "WineMind.xcodeproj"
         XCODE_SCHEME: "WineMind"
 
+    # Compile-check on pull requests only. Pushes to main go straight to the
+    # TestFlight workflow below, so we don't double-build on every push.
     triggering:
       events:
-        - push
         - pull_request
       branch_patterns:
         - pattern: "main"
@@ -80,9 +81,16 @@ workflows:
         XCODE_PROJECT: "WineMind.xcodeproj"
         XCODE_SCHEME: "WineMind"
 
+    # Builds + uploads to TestFlight automatically on every push to main,
+    # and also on explicit v* release tags. The build number is derived from
+    # max(App Store latest + 1, $BUILD_NUMBER), so each push gets a unique one.
     triggering:
       events:
+        - push
         - tag
+      branch_patterns:
+        - pattern: "main"
+          include: true
       tag_patterns:
         - pattern: "v*"
           include: true
