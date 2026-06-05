@@ -26,6 +26,12 @@ struct CameraCaptureView: View {
                     cameraPrompt
                 }
             }
+            // Must live on the always-present container, not on cameraPrompt:
+            // capturing a photo swaps cameraPrompt out at the same moment
+            // capturedImage changes, so an onChange there never fires.
+            .onChange(of: capturedImage) { _, newValue in
+                if newValue != nil { analyzeImage() }
+            }
             .navigationTitle("Add Wine")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -125,11 +131,6 @@ struct CameraCaptureView: View {
             .padding(.horizontal, 32)
 
             Spacer()
-        }
-        .onChange(of: capturedImage) { _, newValue in
-            if newValue != nil {
-                analyzeImage()
-            }
         }
     }
 
