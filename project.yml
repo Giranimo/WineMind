@@ -15,7 +15,9 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     DEVELOPMENT_TEAM: "5945KAV43T"
-    CODE_SIGN_STYLE: Automatic
+    # Manual signing: CI fetches/creates the distribution profile via the
+    # App Store Connect API and applies it with `xcode-project use-profiles`.
+    CODE_SIGN_STYLE: Manual
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     ENABLE_PREVIEWS: "YES"

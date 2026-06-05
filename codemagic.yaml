@@ -98,9 +98,14 @@ workflows:
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
-            --create
+            --create \
+            --verbose
           keychain add-certificates
-          xcode-project use-profiles
+          echo "--- Provisioning profiles on disk ---"
+          ls -la "$HOME/Library/MobileDevice/Provisioning Profiles/" || true
+          echo "--- Certificates in keychain ---"
+          security find-identity -v -p codesigning || true
+          xcode-project use-profiles --verbose
 
       - name: Increment build number
         script: |
