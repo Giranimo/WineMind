@@ -3,6 +3,7 @@ import SwiftData
 
 struct WinePredictionView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.openURL) private var openURL
     @Query private var allWines: [Wine]
     @EnvironmentObject var profileStore: TasteProfileStore
 
@@ -176,6 +177,14 @@ struct WinePredictionView: View {
                     }
                     .buttonStyle(WineButtonStyle(prominent: true))
 
+                    Button {
+                        openReviews()
+                    } label: {
+                        Label("Find Reviews Online", systemImage: "magnifyingglass")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(WineButtonStyle())
+
                     Button("Maybe Later") {
                         dismiss()
                     }
@@ -190,6 +199,16 @@ struct WinePredictionView: View {
                 Spacer().frame(height: 30)
             }
         }
+    }
+
+    private func openReviews() {
+        let query = [wineInfo.name, wineInfo.winery, wineInfo.vintage > 0 ? String(wineInfo.vintage) : ""]
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+        guard !query.isEmpty,
+              let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+              let url = URL(string: "https://www.vivino.com/search/wines?q=\(encoded)") else { return }
+        openURL(url)
     }
 
     private func confidenceMeter(_ confidence: Double) -> some View {
