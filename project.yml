@@ -14,7 +14,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    DEVELOPMENT_TEAM: "" # set in CI via codemagic.yaml / GitHub Actions
+    DEVELOPMENT_TEAM: "5945KAV43T"
     CODE_SIGN_STYLE: Automatic
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
