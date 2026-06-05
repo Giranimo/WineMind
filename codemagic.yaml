@@ -63,10 +63,11 @@ workflows:
     max_build_duration: 60
     integrations:
       app_store_connect: codemagic  # configure in Codemagic UI
+    # NOTE: no `ios_signing:` block here on purpose. That block enables
+    # Codemagic's MANAGED signing, which runs in the prepare phase and aborts
+    # with "No matching profiles found" when no profile exists yet. Instead we
+    # create the cert + profile ourselves in the script below.
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.winemind.app
       xcode: latest
       vars:
         BUNDLE_ID: "com.winemind.app"
@@ -89,14 +90,15 @@ workflows:
 
       - name: Set up code signing (create cert + profile if missing)
         script: |
-          # Fetch the App Store distribution cert + provisioning profile,
-          # creating them via the App Store Connect API if they don't exist
-          # yet (no Mac / CSR required). Requires the App Store Connect API
-          # key to have the App Manager (or Admin) role.
+          # Create the build keychain FIRST, then fetch the App Store
+          # distribution cert + provisioning profile, creating them via the
+          # App Store Connect API if they don't exist yet (no Mac / CSR
+          # required). Requires the App Store Connect API key to have the
+          # App Manager (or Admin) role.
+          keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" \
             --type IOS_APP_STORE \
             --create
-          keychain initialize
           keychain add-certificates
           xcode-project use-profiles
 
