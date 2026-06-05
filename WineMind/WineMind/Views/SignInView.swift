@@ -4,6 +4,13 @@ import AuthenticationServices
 struct SignInView: View {
     @EnvironmentObject var auth: AuthService
 
+    /// Shown on screen so we can confirm exactly which build is installed.
+    private static var appVersion: String {
+        let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        let b = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
+        return "v\(v) (build \(b))"
+    }
+
     var body: some View {
         ZStack {
             WineTheme.backgroundGradient
@@ -43,6 +50,10 @@ struct SignInView: View {
                         .font(.wineCallout)
                         .foregroundStyle(WineTheme.gold)
                         .italic()
+
+                    Text(Self.appVersion)
+                        .font(.wineCaption)
+                        .foregroundStyle(WineTheme.dimText)
                 }
 
                 Spacer()
