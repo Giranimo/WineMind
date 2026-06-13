@@ -15,6 +15,26 @@ struct WinePredictor {
         let ratedWines = userWines.filter { $0.score > 0 }
         let hasProfile = tasteProfile.isComplete
 
+        // Short-circuit: re-scanning a wine the user already rated
+        if !wineInfo.name.isEmpty {
+            let fold: (String) -> String = {
+                $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            }
+            let foldedName = fold(wineInfo.name)
+            let foldedWinery = fold(wineInfo.winery)
+            if let existing = ratedWines.first(where: {
+                fold($0.name) == foldedName &&
+                (foldedWinery.isEmpty || fold($0.winery) == foldedWinery)
+            }) {
+                return WinePrediction(
+                    verdict: verdictFor(score: existing.score, confidence: 1.0),
+                    confidence: 1.0,
+                    reasons: ["You've already rated this wine \(String(format: "%.1f", existing.score))"],
+                    predictedScore: existing.score
+                )
+            }
+        }
+
         // If no rated wines AND no quiz profile, we genuinely can't predict
         guard ratedWines.count >= 3 || hasProfile else {
             return WinePrediction(
@@ -68,33 +88,35 @@ struct WinePredictor {
             }
         }
 
-        // SIGNAL 3: Color match
+        // SIGNAL 3: Color match (weight scales with sample size like variety/region)
         let sameColor = ratedWines.filter { $0.color == wineInfo.color }
         if !sameColor.isEmpty {
             let avgScore = sameColor.reduce(0.0) { $0 + $1.score } / Double(sameColor.count)
+            let countWeight = min(Double(sameColor.count) / 5.0, 1.0)
             signals.append(Signal(
                 score: avgScore,
-                weight: 0.15,
-                reason: "You generally enjoy \(wineInfo.color.rawValue.lowercased()) wines"
+                weight: 0.15 * countWeight,
+                reason: colorReason(avg: avgScore, color: wineInfo.color)
             ))
         }
 
-        // SIGNAL 4: Body match
+        // SIGNAL 4: Body match (weight scales with sample size)
         let sameBody = ratedWines.filter { $0.body == wineInfo.body }
         if !sameBody.isEmpty {
             let avgScore = sameBody.reduce(0.0) { $0 + $1.score } / Double(sameBody.count)
+            let countWeight = min(Double(sameBody.count) / 5.0, 1.0)
             signals.append(Signal(
                 score: avgScore,
-                weight: 0.10,
-                reason: "\(wineInfo.body.rawValue)-bodied wines suit you"
+                weight: 0.10 * countWeight,
+                reason: bodyReason(avg: avgScore, body: wineInfo.body)
             ))
         }
 
         // SIGNAL 5: Community signal (similar wines highly rated by other users)
         if !publicRatings.isEmpty {
             let communityMatches = publicRatings.filter { rating in
-                rating.variety.lowercased() == wineInfo.variety.lowercased() ||
-                rating.region.lowercased() == wineInfo.region.lowercased()
+                (!wineInfo.variety.isEmpty && rating.variety.lowercased() == wineInfo.variety.lowercased()) ||
+                (!wineInfo.region.isEmpty && rating.region.lowercased() == wineInfo.region.lowercased())
             }
             if !communityMatches.isEmpty {
                 let avgCommunity = communityMatches.reduce(0.0) { $0 + $1.score } / Double(communityMatches.count)
@@ -118,7 +140,9 @@ struct WinePredictor {
         let totalWeight = signals.reduce(0.0) { $0 + $1.weight }
         let weightedScore = signals.reduce(0.0) { $0 + $1.score * $1.weight }
         let predictedScore = totalWeight > 0 ? weightedScore / totalWeight : 5.0
-        let confidence = min(totalWeight / 0.7, 1.0)
+        // Scale down confidence when the evidence base is thin (quiz-only = max ~35%)
+        let evidenceFactor = min(1.0, 0.35 + Double(ratedWines.count) / 12.0)
+        let confidence = min(totalWeight / 0.7, 1.0) * evidenceFactor
 
         // Sort reasons by signal weight
         let topReasons = signals
@@ -205,26 +229,37 @@ struct WinePredictor {
             }
         }
 
-        // Variety match from quiz
-        if !profile.preferredVarieties.isEmpty,
-           !wineInfo.variety.isEmpty,
-           profile.preferredVarieties.contains(wineInfo.variety) {
-            signals.append(Signal(
-                score: 9.0,
-                weight: 0.30 * baseWeight,
-                reason: "You marked \(wineInfo.variety) as a favorite"
-            ))
+        // Variety match from quiz (diacritic-folded so OCR variants match quiz strings)
+        if !profile.preferredVarieties.isEmpty, !wineInfo.variety.isEmpty {
+            let fold: (String) -> String = {
+                $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            }
+            let foldedVariety = fold(wineInfo.variety)
+            if profile.preferredVarieties.contains(where: { fold($0) == foldedVariety }) {
+                signals.append(Signal(
+                    score: 8.0,
+                    weight: 0.30 * baseWeight,
+                    reason: "You marked \(wineInfo.variety) as a favorite"
+                ))
+            }
         }
 
-        // Region match from quiz
-        if !profile.preferredRegions.isEmpty,
-           !wineInfo.region.isEmpty,
-           profile.preferredRegions.contains(wineInfo.region) {
-            signals.append(Signal(
-                score: 9.0,
-                weight: 0.25 * baseWeight,
-                reason: "You marked \(wineInfo.region) as a favorite region"
-            ))
+        // Region match from quiz (diacritic-folded; containment handles sub/super region pairs)
+        if !profile.preferredRegions.isEmpty, !wineInfo.region.isEmpty {
+            let fold: (String) -> String = {
+                $0.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+            }
+            let foldedRegion = fold(wineInfo.region)
+            if profile.preferredRegions.contains(where: {
+                let f = fold($0)
+                return f == foldedRegion || f.contains(foldedRegion) || foldedRegion.contains(f)
+            }) {
+                signals.append(Signal(
+                    score: 8.0,
+                    weight: 0.25 * baseWeight,
+                    reason: "You marked \(wineInfo.region) as a favorite region"
+                ))
+            }
         }
 
         return signals
@@ -243,6 +278,23 @@ struct WinePredictor {
         case 6..<7: return .maybe
         case 5..<6: return .meh
         default: return .skip
+        }
+    }
+
+    private func colorReason(avg: Double, color: WineColor) -> String {
+        let name = color.rawValue.lowercased()
+        switch avg {
+        case 7.5...: return "You generally enjoy \(name) wines (avg \(String(format: "%.1f", avg)))"
+        case 5.5..<7.5: return "Your \(name) wines have been mixed (avg \(String(format: "%.1f", avg)))"
+        default: return "\(color.rawValue) wines haven't been your thing (avg \(String(format: "%.1f", avg)))"
+        }
+    }
+
+    private func bodyReason(avg: Double, body: WineBody) -> String {
+        switch avg {
+        case 7.5...: return "\(body.rawValue)-bodied wines suit you (avg \(String(format: "%.1f", avg)))"
+        case 5.5..<7.5: return "\(body.rawValue)-bodied wines have been mixed for you"
+        default: return "\(body.rawValue)-bodied wines haven't been your usual"
         }
     }
 
